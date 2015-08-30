@@ -1,6 +1,6 @@
 util.AddNetworkString("MLevel_SyncClientToServer")
 
-function MLevel_SyncClient(ply)
+function MLevel_SyncClient(ply) 	// What's a NWInt? Lol fix that shit
 	net.Start("MLevel_SyncClientToServer")
 		net.WriteEntity(ply)
 		net.WriteInt(ply:GetNWInt("MLevel"), 	32)

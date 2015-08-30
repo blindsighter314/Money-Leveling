@@ -1,4 +1,4 @@
-net.Receive("MLevel_SyncClientToServer", function()
+net.Receive("MLevel_SyncClientToServer", function() // What's a NWInt? Lol fix that shit
 	local ply =		net.ReadEntity()
 	local level = 	net.ReadInt(32)
 	local exp = 	net.ReadInt(32)
