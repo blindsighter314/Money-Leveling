@@ -18,7 +18,7 @@ function MLevel_IsVar(ply, var)
 end
 
 function MLevel_FixPlayerExp(ply, numLeft)
-	if numLeft > ply:GetMLevel() then
+	if numLeft >= ply:GetMLevel() then
 		numLeft = numLeft - ply:GetMLevel()
 		ply:MLevelUp()
 		MLevel_FixPlayerExp(ply, numLeft)
@@ -37,29 +37,27 @@ end
 // Get Info /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function user:GetMLevel()
 	if not self:IsPlayer() then print("MLevel: Attempted to get the level of a nil player") return end
-//	return self:GetNWInt("MLevel")
 	return self.MLevel
 end
 
 function user:GetMExp()
 	if not self:IsPlayer() then print("MLevel: Attempted to get the level of a nil player") return end
-//	return self:GetNWInt("MExp")
 	return self.MExp
 end
 
 function user:GetMSkill()
 	if not self:IsPlayer() then print("MLevel: Attempted to get the Skill Points of a nil player") return end
-//	return self:GetNWInt("MSkill")
 	return self.MSkill
 end
 
 function user:GetMVar(var)
 	if not user:IsPlayer() then print("MLevel: Attempted to get the "..var.." of a nil player") return end
-	if MLevel_IsVar(var) == false then print("MLevel: Attempted to get "..var..", A nil Variable") return end
-	return MLevel_IsVar(var)
+	if MLevel_IsVar(self, var) == false then print("MLevel: Attempted to get "..var..", A nil Variable") return end
+	return MLevel_IsVar(self, var)
 end
 
 // Set Info /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
 function user:SetMLevel(num, runSyncCheck) 	// NEEDS A SKILL CLAMP, LOOK AT YOUR NOTES PLUG PLUG PLUG PLUG PLUG PLUG PLUG
 	if not self:IsPlayer() then print("MLevel: Attempted to set the level of a nil player") return end
@@ -79,8 +77,60 @@ function user:SetMLevel(num, runSyncCheck) 	// NEEDS A SKILL CLAMP, LOOK AT YOUR
 		else
 			self:SetMSkill(self:GetMSkill() + (num - curLevel))
 		end
+
 		self.MLevel = num
 		MLevel_FixPlayerExp(self, self:GetMExp())
+
+		local totalSkillPoints = self:GetMSkill()
+		totalSkillPoints = (totalSkillPoints + self:GetMVar("health"))
+		totalSkillPoints = (totalSkillPoints + self:GetMVar("armor"))
+		totalSkillPoints = (totalSkillPoints + self:GetMVar("speed"))
+		totalSkillPoints = (totalSkillPoints + self:GetMVar("jump"))
+		totalSkillPoints = (totalSkillPoints + self:GetMVar("fall"))
+
+		if totalSkillPoints > self:GetMLevel() then
+			if self:GetMSkill() > 0 then
+				while self:GetMSkill() > 0 and totalSkillPoints > self:GetMLevel() do
+					self:SetMSkill(self:GetMSkill() - 1, false)
+					totalSkillPoints = (totalSkillPoints - 1)
+				end
+			end
+
+			if self:GetMVar("health") > 0 then
+				while self:GetMVar("health") > 0 and totalSkillPoints > self:GetMLevel() do
+					self:SetMVar("health", self:GetMVar("health") - 1, false)
+					totalSkillPoints = (totalSkillPoints - 1)
+				end
+			end
+
+			if self:GetMVar("armor") > 0 then
+				while self:GetMVar("armor") > 0 and totalSkillPoints > self:GetMLevel() do
+					self:SetMVar("armor", self:GetMVar("armor") - 1, false)
+					totalSkillPoints = (totalSkillPoints - 1)
+				end
+			end
+
+			if self:GetMVar("speed") > 0 then
+				while self:GetMVar("speed") > 0 and totalSkillPoints > self:GetMLevel() do
+					self:SetMVar("speed", self:GetMVar("speed") - 1, false)
+					totalSkillPoints = (totalSkillPoints - 1)
+				end
+			end
+
+			if self:GetMVar("jump") > 0 then
+				while self:GetMVar("jump") > 0 and totalSkillPoints > self:GetMLevel() do
+					self:SetMVar("jump", self:GetMVar("jump") - 1, false)
+					totalSkillPoints = (totalSkillPoints - 1)
+				end
+			end
+
+			if self:GetMVar("fall") > 0 then
+				while self:GetMVar("fall") > 0 and totalSkillPoints > self:GetMLevel() do
+					self:SetMVar("fall", self:GetMVar("fall") - 1, false)
+					totalSkillPoints = (totalSkillPoints - 1)
+				end
+			end
+		end
 	else
 		self.MLevel = num
 	end
@@ -104,43 +154,57 @@ function user:SetMSkill(num, runSyncCheck)
 	if num == nil or num < 0 then print("MLevel: Invalid skill amount") return end
 
 	if MLevel_RealisticallySyncStatsOnChange == true and runSyncCheck == true then
-		local curLevel 	= ply:GetMLevel()
-		local curSkill 	= ply:GetMSkill()
+		local curLevel 	= self:GetMLevel()
+		local curSkill 	= self:GetMSkill()
 		local change 	= (num - curSkill)
 
-		ply:SetMLevel(curLevel + change, false)
+		self:SetMLevel(curLevel + change, false)
 		MLevel_FixPlayerExp(self, num)
 	end
-	ply.MSkill = num
+	self.MSkill = num
+	MLevel_SyncClient(self)
 end
 
 function user:SetMVar(var, num, runSyncCheck)	// Still needs work
-	if MLevel_IsVar(var) == false then print("MLevel: Invalid skill") return end
+	if MLevel_IsVar(self, var) == false then print("MLevel: Invalid skill") return end
 	if not self:IsPlayer() then print("MLevel: Attempted to set the skill of a nil player") return end
 	if num == nil or num < 0 then print("MLevel: Invalid skill amount") return end
-	local trueVar = MLevel_IsVar(var)
+	local trueVar = MLevel_IsVar(self, var)
 
 	if MLevel_RealisticallySyncStatsOnChange == true and runSyncCheck == true then
-		local curLevel 	= ply:GetMLevel()
-		local curVar 	= ply:GetMVar(var)
+		local curLevel 	= self:GetMLevel()
+		local curVar 	= self:GetMVar(var)
 
 		if num > curVar then
-			ply:SetMLevel(ply:GetMLevel + (num - curVar), false)
+			self:SetMLevel(self:GetMLevel() + (num - curVar), false)
 			if var == "health" then
-				ply.MHealth = num
+				self.MHealth = num
 			elseif var == "armor" then
-				ply.MArmor = num
+				self.MArmor = num
 			elseif var == "speed" then
-				ply.MSpeed = num
+				self.MSpeed = num
 			elseif var =="jump" then
-				ply.MJump = num
+				self.MJump = num
 			elseif var == "fall" then
-				ply.MFall = num
+				self.MFall = num
 			else
 				print("MLevel: SOMETHING HAS GONE HORRIBLY WRONG.")
 			end
 		end
+	else
+		if var == "health" then
+			self.MHealth = num
+		elseif var == "armor" then
+			self.MArmor = num
+		elseif var == "speed" then
+			self.MSpeed = num
+		elseif var =="jump" then
+			self.MJump = num
+		elseif var == "fall" then
+			self.MFall = num
+		else
+			print("MLevel: SOMETHING HAS GONE HORRIBLY WRONG.")
+		end
 	end
-
-	self:SetNWInt(var, num)
 end
+

@@ -1,3 +1,17 @@
+// Sending //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+function MLevel_ClientRequestChange(target, changeType, amount, stat)
+	if stat == nil then stat = "" end
+	net.Start("MLevel_PlayerRequestChange")
+		net.WriteEntity(target)
+		net.WriteString(changeType)
+		net.WriteInt(amount, 32)
+		net.WriteString(stat)
+	net.SendToServer()
+end
+
+// Receiving ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 net.Receive("MLevel_SyncClientToServer", function() // What's a NWInt? Lol fix that shit
 	local ply =		net.ReadEntity()
 	local level = 	net.ReadInt(32)
@@ -9,17 +23,6 @@ net.Receive("MLevel_SyncClientToServer", function() // What's a NWInt? Lol fix t
 	local jump =	net.ReadInt(32)
 	local fall = 	net.ReadInt(32)
 
-	/*
-	ply:SetNWInt("MLevel",		level)
-	ply:SetNWInt("MExp",		exp)
-	ply:SetNWInt("MSkill",		skill)
-	ply:SetNWInt("Mhealth",		health)
-	ply:SetNWInt("Marmor",		armor)
-	ply:SetNWInt("Mspeed",		speed)
-	ply:SetNWInt("Mjump",		jump)
-	ply:SetNWInt("Mfall",		fall)
-	*/
-
 	ply.MLevel =		level
 	ply.MExp =			exp
 	ply.MSkill =		skill
@@ -28,4 +31,8 @@ net.Receive("MLevel_SyncClientToServer", function() // What's a NWInt? Lol fix t
 	ply.MSpeed =		speed
 	ply.MJump =			jump
 	ply.MFall =			fall
+end)
+
+net.Receive("MLevel_ClientDebug", function()
+//	print(LocalPlayer().MJump)
 end)
