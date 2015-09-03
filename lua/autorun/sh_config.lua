@@ -12,7 +12,28 @@ MLevel_SpeedPerPoint 	= 5
 MLevel_JumpPerPoint 	= 5	
 MLevel_FallPerPoint 	= 5	
 
+// Usability (How easy the script is to use for players)
+MLevel_Notification = true // Notify players when they level up/buy exp
 
+// Permissions (Who is an admin? Who gets special treatment?)
+MLevel_AdminRanks = {
+	"superadmin",
+	"admin"
+}
+
+function MLevel_PushAdmin(ply) 	// This is where to put special exceptions ie. "Joe" is a user but I want him to have admin powers
+	if ply:SteamID() == "STEAM_0:0:000000000" then return true end
+end
+
+function MLevel_DiscountPrice(ply)
+	if ply:IsUserGroup("Owner") then return 0.5 end 			// This means that anyone with the "owner" rank gets half off
+	if ply:SteamID() == "STEAM_0:0:000000000" then return 0 end // Anyone with this Steam ID gets experience free
+
+
+
+
+	return 1 // DO NOT TOUCH THIS, CHANGING THIS COULD BREAK THE SCRIPT			
+end
 
 // Fixes and Compatibility (May effect usability; Only touch these if it's neccesary)
 

@@ -18,13 +18,24 @@ function MLevel_IsVar(ply, var)
 end
 
 function MLevel_FixPlayerExp(ply, numLeft)
-	if numLeft >= ply:GetMLevel() then
-		numLeft = numLeft - ply:GetMLevel()
+	if (ply:GetMExp() + numLeft) >= ply:GetMLevel() and numLeft ~= 0 then
+		if ply:GetMLevel() == 0 then
+			numLeft = numLeft - 1
+		else
+			numLeft = (numLeft + ply:GetMExp()) - ply:GetMLevel()
+		end
+		
 		ply:MLevelUp()
+		ply.MExp = 0
+
+		if MLevel_Notification == true then
+			DarkRP.notify(ply, 2, 10, ("You leveled up! You are now level "..ply:GetMLevel()))
+		end
 		MLevel_FixPlayerExp(ply, numLeft)
 	else
-		ply.MExp = numLeft
+		ply.MExp = (ply:GetMExp() + numLeft)
 	end
+	MLevel_SyncClient(ply)
 end
 
 // Control //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -165,7 +176,7 @@ function user:SetMSkill(num, runSyncCheck)
 	MLevel_SyncClient(self)
 end
 
-function user:SetMVar(var, num, runSyncCheck)	// Still needs work
+function user:SetMVar(var, num, runSyncCheck)
 	if MLevel_IsVar(self, var) == false then print("MLevel: Invalid skill") return end
 	if not self:IsPlayer() then print("MLevel: Attempted to set the skill of a nil player") return end
 	if num == nil or num < 0 then print("MLevel: Invalid skill amount") return end
@@ -206,5 +217,6 @@ function user:SetMVar(var, num, runSyncCheck)	// Still needs work
 			print("MLevel: SOMETHING HAS GONE HORRIBLY WRONG.")
 		end
 	end
+	MLevel_SyncClient(self)
 end
 

@@ -1,3 +1,5 @@
+// This addon having a hud element? Maybe some day™
+/*
 CreateClientConVar("ML_BoxX", "0", true, true)
 CreateClientConVar("ML_BoxY", tostring(ScrW() - 115), true, true)
 CreateClientConVar("ML_BoxW", "100", true, true)
@@ -43,3 +45,4 @@ function MLevel_HudElement() // plug
 	draw.DrawText(("Fall:\t "..ply.MFall), "MoneyLevelFont", 		x + 5, y + (sp * 8) - 10, Color(0, 0, 0, 255), TEXT_ALIGN_LEFT)
 end
 hook.Add("HUDPaint", "Add MLevel Hud element", MLevel_HudElement)
+*/

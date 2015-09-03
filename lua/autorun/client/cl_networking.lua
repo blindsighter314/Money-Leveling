@@ -10,6 +10,24 @@ function MLevel_ClientRequestChange(target, changeType, amount, stat)
 	net.SendToServer()
 end
 
+function MLevel_ClientRequestWipe(target)
+	net.Start("MLevel_PlayerRequestWipe")
+		net.WriteEntity(target)
+	net.SendToServer()
+end
+
+function MLevel_ClientRequestExpBuy(amount)
+	net.Start("MLevel_PlayerRequestBuyExp")
+		net.WriteInt(amount, 32)
+	net.SendToServer()
+end
+
+function MLevel_ClientRequestStatIncrease(stat)
+	net.Start("MLevel_PlayerRequestIncreaseStat")
+		net.WriteString(stat)
+	net.SendToServer()
+end
+
 // Receiving ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 net.Receive("MLevel_SyncClientToServer", function() // What's a NWInt? Lol fix that shit
@@ -31,8 +49,4 @@ net.Receive("MLevel_SyncClientToServer", function() // What's a NWInt? Lol fix t
 	ply.MSpeed =		speed
 	ply.MJump =			jump
 	ply.MFall =			fall
-end)
-
-net.Receive("MLevel_ClientDebug", function()
-//	print(LocalPlayer().MJump)
 end)
